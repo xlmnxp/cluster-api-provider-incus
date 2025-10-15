@@ -2,7 +2,6 @@ package lxc
 
 import (
 	"maps"
-	"strings"
 
 	"github.com/lxc/incus/v6/shared/api"
 )
@@ -16,9 +15,9 @@ type LaunchOptions struct {
 	// Not supported by virtual-machine instance types.
 	createFiles []instanceFileCreator
 	// replacements are a list of string replacements to perform on files on the machine.
-	// The replacer is expected to be idempotent.
+	// The replacement is expected to be idempotent.
 	// Not supported by virtual-machine instance types.
-	replacements map[string]*strings.Replacer
+	replacements map[string]map[string]string
 	// devices is instance device configuration.
 	devices map[string]map[string]string
 	// config is instance configuration.
@@ -31,6 +30,8 @@ type LaunchOptions struct {
 	flavor string
 	// instanceType is the instance type.
 	instanceType api.InstanceType
+	// unixSocket bind mounts the admin unix socket into the instance at /run-unix.socket (potentially insecure).
+	unixSocket bool
 }
 
 // WithInstanceTemplates appends instance templates.
@@ -85,7 +86,7 @@ func (o *LaunchOptions) WithDirectories(new ...string) *LaunchOptions {
 }
 
 // WithReplacements appends instance file replacements.
-func (o *LaunchOptions) WithReplacements(new map[string]*strings.Replacer) *LaunchOptions {
+func (o *LaunchOptions) WithReplacements(new map[string]map[string]string) *LaunchOptions {
 	if o.replacements == nil {
 		o.replacements = maps.Clone(new)
 	} else {
@@ -138,5 +139,11 @@ func (o *LaunchOptions) WithFlavor(v string) *LaunchOptions {
 // WithInstanceType sets the instance type (container or virtual-machine)
 func (o *LaunchOptions) WithInstanceType(v api.InstanceType) *LaunchOptions {
 	o.instanceType = v
+	return o
+}
+
+// WithUnixSocket bind mounts the admin unix socket into the instance at /run-unix.socket (potentially insecure).
+func (o *LaunchOptions) WithUnixSocket(v bool) *LaunchOptions {
+	o.unixSocket = v
 	return o
 }
