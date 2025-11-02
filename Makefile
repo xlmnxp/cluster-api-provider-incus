@@ -137,7 +137,8 @@ test-e2e: ginkgo kustomize kini ## Run e2e tests
 				$(E2E_ARGS)
 
 .PHONY: run-test-conformance
-run-test-conformance: ginkgo kustomize
+run-test-conformance: TAG = e2e
+run-test-conformance: ginkgo kustomize ko-load-docker
 	env \
 		KUBETEST_CONFIGURATION="$(KUBETEST_CONFIGURATION)" \
 		time $(GINKGO) \
@@ -180,6 +181,10 @@ ko-build: ko $(LOCALBIN) ## Build manager image and load to local docker instanc
 .PHONY: ko-load-kini
 ko-load-kini: ko-build kini ## Import manager image to kini cache.
 	KINI_DOCKER_LOGV=5 $(KINI) docker load -i $(TARBALL)
+
+.PHONY: ko-load-docker
+ko-load-docker: ko-build kini ## Import manager image to docker.
+	docker load -i $(TARBALL)
 
 .PHONY: ko-login
 ko-login: ko ## Configure credentials for pushing images (needs USERNAME and PASSWORD).
